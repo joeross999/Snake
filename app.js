@@ -20,6 +20,11 @@ var model = {
     }
 };
 
+var controller = {
+    gameState: "Run",
+    collision: [],
+};
+
 var Snake = function() {
     var obj = {};
     obj.move = {
@@ -111,10 +116,16 @@ var detectCollisions = function(){
     model.walls.vertical.forEach(function(wall){
         if(head.x == wall.x){
             if(head.y > wall.y[0] && head.y < wall.y[1]){
-                return new Collision("wall");
+                controller.collision.push(new Collision("wall"));
             }
         }
-
+    }, this)
+    model.walls.horizontal.forEach(function(wall){
+        if(head.y == wall.y){
+            if(head.x > wall.x[0] && head.x < wall.x[1]){
+                controller.collision.push(new Collision("wall"));
+            }
+        }
     }, this)
 };
 
@@ -137,15 +148,27 @@ var randomNumber = function(min, max){
 
 var gameLoop = function(){
     console.log(JSON.parse(JSON.stringify(model.snake.blocks)));    
-    console.log(model.snake.currentDirection);    
     setTimeout(function() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        controller.collision = [];
         model.snake.move.go();
         detectCollisions();
-        draw();
-        gameLoop();
+        if(controller.collision.length > 0){
+            if(controller.collision[0].type == "wall"){
+                console.log("game over");
+                gameOver();
+            }
+        }
+        if(controller.gameState === "Run"){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            draw();
+            gameLoop();
+        }
     }, 500);
 };
+
+var gameOver = function(){
+    controller.gameState = "Over"
+}
 
 var draw = function(){
     model.snake.draw();
@@ -159,7 +182,6 @@ var init = function(){
     context = canvas.getContext("2d");
     model.snake = new Snake();
     model.coins.push(new Coin(randomPosition()));
-    console.log(model.coins[0]);
     model.coins[0].draw();
     model.snake.draw();
     gameLoop();
