@@ -165,9 +165,14 @@ controller.detectCollisions = function(){
     }, this);
     model.coins.forEach(function(coin){
         if(head.x == coin.position[0] && head.y == coin.position[1]){
-            return controller.collision.push(new object.Collision("coin", coin));
+            controller.collision.push(new object.Collision("coin", coin));
         }
     });
+    for(let i = 0; i < model.snake.blocks.length-1; i++){
+        if(head.x == model.snake.blocks[i][0] && head.y == model.snake.blocks[i][1]){
+            controller.collision.push(new object.Collision("snake", model.snake.blocks[i]));
+        };
+    };
 };
 
 controller.randomPosition = function(){
@@ -186,7 +191,7 @@ controller.gameLoop = function(){
         model.snake.move.go();
         controller.detectCollisions();
         if(controller.collision.length > 0){
-            if(controller.collision[0].type == "wall"){
+            if(controller.collision[0].type == "wall" || controller.collision[0].type == "snake"){
                 controller.gameOver();
             }
             if(controller.collision[0].type =="coin"){
