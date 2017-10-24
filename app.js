@@ -65,14 +65,16 @@ var object = {
                 var newBlock = obj.blocks[obj.blocks.length - 1].slice(0);
                 newBlock[0] += obj.currentDirection.horizontal * obj.speed;
                 newBlock[1] += obj.currentDirection.vertical * obj.speed;
+                obj.oldTail = obj.blocks[0];
                 for(var i = 0; i < obj.blocks.length-1; i++){
                     obj.blocks[i] = obj.blocks[i+1].slice(0);
                 }
-                obj.blocks.pop();
-                obj.blocks.push(newBlock);
+                obj.blocks.pop();    
+                obj.blocks.push(newBlock);                
                 moveable = true;
             },
         }
+        oldTail =  {};
         obj.currentDirection = model.directions.down;
         obj.speed = 10;
         obj.length = 1;
@@ -85,7 +87,10 @@ var object = {
                 view.context.fillStyle="#000";
                 view.context.fillRect(obj.blocks[i][0], obj.blocks[i][1], obj.blockSize, obj.blockSize);
             }
-        }
+        };
+        obj.increaseLength = function(){
+            obj.blocks.unshift(obj.oldTail);
+        };
         return obj;
     },
     
@@ -140,6 +145,7 @@ controller.keypressHandler = function(e){
 };
 
 controller.detectCollisions = function(){
+    controller.collision = [];    
     var head = {};
     head.x = model.snake.blocks[model.snake.blocks.length -1][0];
     head.y = model.snake.blocks[model.snake.blocks.length -1][1];
@@ -158,11 +164,7 @@ controller.detectCollisions = function(){
         }
     }, this);
     model.coins.forEach(function(coin){
-        console.log("coin + head");
-        console.log(coin);
-        console.log(head)
         if(head.x == coin.position[0] && head.y == coin.position[1]){
-            console.log("Coin Collision!!!!!!!!!!")
             return controller.collision.push(new object.Collision("coin", coin));
         }
     });
@@ -181,26 +183,24 @@ controller.randomNumber = function(min, max){
 controller.gameLoop = function(){
     console.log(JSON.parse(JSON.stringify(model.snake.blocks)));    
     setTimeout(function() {
-        controller.collision = [];
         model.snake.move.go();
         controller.detectCollisions();
         if(controller.collision.length > 0){
             if(controller.collision[0].type == "wall"){
-                console.log("game over");
                 controller.gameOver();
             }
             if(controller.collision[0].type =="coin"){
-                console.log("model.score++;");
                 model.score++;
                 model.coins.pop();
-                console.log(model.score);
+                model.coins.push(new object.Coin(controller.randomPosition()));
+                model.snake.increaseLength();
             }
         }
         controller.draw();
         if(controller.gameState === model.gameStates.play){
             controller.gameLoop();
         }
-    }, 500);
+    }, 200);
 };
 
 controller.gameOver = function(){
