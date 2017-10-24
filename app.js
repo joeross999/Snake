@@ -18,7 +18,18 @@ var model = {
         ],
         
     },
-    score: 0
+    score: 0,
+    gameStates: {
+        over: {
+            headerText: "Game Over :("
+        },
+        play: {
+            headerText: "Score: "
+        },
+        start: {
+            headerText: "Press the Play button :)"
+        }
+    }
 };
 
 var object = {
@@ -101,12 +112,13 @@ var object = {
 var view = {
     score: "",
     canvas: "",
-    context: ""
+    context: "",
+    headerText: ""
 }
 
 var controller = {
-    gameState: "Run",
-    collision: [],
+    gameState: {},
+    collision: []
 };
 
 
@@ -184,38 +196,51 @@ controller.gameLoop = function(){
                 console.log(model.score);
             }
         }
-        if(controller.gameState === "Run"){
-            view.context.clearRect(0, 0, canvas.width, canvas.height);
-            controller.draw();
+        controller.draw();
+        if(controller.gameState === model.gameStates.play){
             controller.gameLoop();
         }
     }, 500);
 };
 
 controller.gameOver = function(){
-    controller.gameState = "Over"
-    
+    controller.gameState = model.gameStates.over;
+    model.score = "";
+    // Need some sort of game over animation    
 }
 
 controller.draw = function(){
+    view.score.innerHTML = model.score;
+    view.headerText.innerHTML = controller.gameState.headerText;
+    if(controller.gameState === model.gameStates.play){
+    controller.fillCanvas();
+    }
+}
+
+controller.fillCanvas = function(){
+    view.context.clearRect(0, 0, canvas.width, canvas.height);
     model.snake.draw();
     model.coins.forEach(function(element) {
         element.draw();
     }, this);
-    view.score.innerHTML = model.score;
+    
 }
 
 controller.init = function(){
+    // Get view elements
     view.canvas = document.getElementById("canvas");
     view.context = view.canvas.getContext("2d");
     view.score = document.getElementsByClassName("score")[0];
+    view.headerText = document.getElementsByClassName("header-text")[0];
+    // Set initial Model elements
+    model.headerText = "Score: "
     model.score = 0;
     model.snake = new object.Snake();
     model.coins.push(new object.Coin(controller.randomPosition()));
     model.score = 0;
+    controller.gameState = model.gameStates.play;
+    // Draw scene
     controller.draw();
-    console.log(view.score);
-    view.score.innerHTML = 0;
     controller.gameLoop();
 };
 
