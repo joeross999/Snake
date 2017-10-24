@@ -21,7 +21,84 @@ var model = {
     score: 0
 };
 
-var elements = {
+var object = {
+    Snake: function() {
+        var obj = {};
+        obj.move = {
+            up: function(){
+                if(obj.currentDirection != model.directions.down && moveable){
+                    obj.currentDirection = model.directions.up;
+                }
+                moveable = false;
+            },
+            down: function(){
+                if(obj.currentDirection != model.directions.up && moveable){
+                    obj.currentDirection = model.directions.down;
+                }
+                moveable = false;
+            },
+            right: function(){
+                if(obj.currentDirection != model.directions.left && moveable){
+                    obj.currentDirection = model.directions.right;
+                }
+                moveable = false;
+            },
+            left: function(){
+                if(obj.currentDirection != model.directions.right && moveable){
+                    obj.currentDirection = model.directions.left;
+                }
+                moveable = false;
+            },
+            moveable: true,
+            go: function(){
+                var newBlock = obj.blocks[obj.blocks.length - 1].slice(0);
+                newBlock[0] += obj.currentDirection.horizontal * obj.speed;
+                newBlock[1] += obj.currentDirection.vertical * obj.speed;
+                for(var i = 0; i < obj.blocks.length-1; i++){
+                    obj.blocks[i] = obj.blocks[i+1].slice(0);
+                }
+                obj.blocks.pop();
+                obj.blocks.push(newBlock);
+                moveable = true;
+            },
+        }
+        obj.currentDirection = model.directions.down;
+        obj.speed = 10;
+        obj.length = 1;
+        obj.blockSize = 9;
+        obj.blocks = [
+            [10, 10], [20, 10], [30, 10]
+        ];
+        obj.draw = function(){
+            for(var i = 0; i < obj.blocks.length; i++){
+                view.context.fillStyle="#000";
+                view.context.fillRect(obj.blocks[i][0], obj.blocks[i][1], obj.blockSize, obj.blockSize);
+            }
+        }
+        return obj;
+    },
+    
+    Coin: function(pos){
+        var obj = {};
+        obj.position = pos;
+        obj.draw = function(){
+            view.context.fillStyle="#cca002";
+            view.context.fillRect(obj.position[0], obj.position[1], obj.size, obj.size);        
+        }
+        obj.size = 9;
+        return obj;
+    },
+    Collision: function(type, obj){
+        var obj = {};
+        obj.type = type;
+        collisionObj = obj
+        return obj;
+    }
+};
+
+
+
+var view = {
     score: "",
     canvas: "",
     context: ""
@@ -32,74 +109,8 @@ var controller = {
     collision: [],
 };
 
-var Snake = function() {
-    var obj = {};
-    obj.move = {
-        up: function(){
-            if(obj.currentDirection != model.directions.down && moveable){
-                obj.currentDirection = model.directions.up;
-            }
-            moveable = false;
-        },
-        down: function(){
-            if(obj.currentDirection != model.directions.up && moveable){
-                obj.currentDirection = model.directions.down;
-            }
-            moveable = false;
-        },
-        right: function(){
-            if(obj.currentDirection != model.directions.left && moveable){
-                obj.currentDirection = model.directions.right;
-            }
-            moveable = false;
-        },
-        left: function(){
-            if(obj.currentDirection != model.directions.right && moveable){
-                obj.currentDirection = model.directions.left;
-            }
-            moveable = false;
-        },
-        moveable: true,
-        go: function(){
-            var newBlock = obj.blocks[obj.blocks.length - 1].slice(0);
-            newBlock[0] += obj.currentDirection.horizontal * obj.speed;
-            newBlock[1] += obj.currentDirection.vertical * obj.speed;
-            for(var i = 0; i < obj.blocks.length-1; i++){
-                obj.blocks[i] = obj.blocks[i+1].slice(0);
-            }
-            obj.blocks.pop();
-            obj.blocks.push(newBlock);
-            moveable = true;
-        },
-    }
-    obj.currentDirection = model.directions.down;
-    obj.speed = 10;
-    obj.length = 1;
-    obj.blockSize = 9;
-    obj.blocks = [
-        [10, 10], [20, 10], [30, 10]
-    ];
-    obj.draw = function(){
-        for(var i = 0; i < obj.blocks.length; i++){
-            elements.context.fillStyle="#000";
-            elements.context.fillRect(obj.blocks[i][0], obj.blocks[i][1], obj.blockSize, obj.blockSize);
-        }
-    }
-    return obj;
-};
 
-var Coin = function(pos){
-    var obj = {};
-    obj.position = pos;
-    obj.draw = function(){
-        elements.context.fillStyle="#cca002";
-        elements.context.fillRect(obj.position[0], obj.position[1], obj.size, obj.size);        
-    }
-    obj.size = 9;
-    return obj;
-};
-
-var keypressHandler = function(e){
+controller.keypressHandler = function(e){
     switch(e.key){
         case "ArrowUp":
             model.snake.move.up();
@@ -116,21 +127,21 @@ var keypressHandler = function(e){
     }
 };
 
-var detectCollisions = function(){
+controller.detectCollisions = function(){
     var head = {};
     head.x = model.snake.blocks[model.snake.blocks.length -1][0];
     head.y = model.snake.blocks[model.snake.blocks.length -1][1];
     model.walls.vertical.forEach(function(wall){
         if(head.x == wall.x){
             if(head.y > wall.y[0] && head.y < wall.y[1]){
-                controller.collision.push(new Collision("wall", wall));
+                controller.collision.push(new object.Collision("wall", wall));
             }
         }
     }, this);
     model.walls.horizontal.forEach(function(wall){
         if(head.y == wall.y){
             if(head.x > wall.x[0] && head.x < wall.x[1]){
-                controller.collision.push(new Collision("wall", wall));
+                controller.collision.push(new object.Collision("wall", wall));
             }
         }
     }, this);
@@ -140,39 +151,31 @@ var detectCollisions = function(){
         console.log(head)
         if(head.x == coin.position[0] && head.y == coin.position[1]){
             console.log("Coin Collision!!!!!!!!!!")
-            return controller.collision.push(new Collision("coin", coin));
+            return controller.collision.push(new object.Collision("coin", coin));
         }
     });
 };
 
-var Collision = function(type, obj){
-    var obj = {};
-    obj.type = type;
-    collisionObj = obj
-    return obj;
-}
-
-
-var randomPosition = function(){
-    var x = randomNumber(1, 49) * 10;
-    var y = randomNumber(1, 49) * 10;
+controller.randomPosition = function(){
+    var x = controller.randomNumber(1, 49) * 10;
+    var y = controller.randomNumber(1, 49) * 10;
     return [x, y];
 };
 
-var randomNumber = function(min, max){
+controller.randomNumber = function(min, max){
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-var gameLoop = function(){
+controller.gameLoop = function(){
     console.log(JSON.parse(JSON.stringify(model.snake.blocks)));    
     setTimeout(function() {
         controller.collision = [];
         model.snake.move.go();
-        detectCollisions();
+        controller.detectCollisions();
         if(controller.collision.length > 0){
             if(controller.collision[0].type == "wall"){
                 console.log("game over");
-                gameOver();
+                controller.gameOver();
             }
             if(controller.collision[0].type =="coin"){
                 console.log("model.score++;");
@@ -182,42 +185,42 @@ var gameLoop = function(){
             }
         }
         if(controller.gameState === "Run"){
-            elements.context.clearRect(0, 0, canvas.width, canvas.height);
-            draw();
-            gameLoop();
+            view.context.clearRect(0, 0, canvas.width, canvas.height);
+            controller.draw();
+            controller.gameLoop();
         }
     }, 500);
 };
 
-var gameOver = function(){
+controller.gameOver = function(){
     controller.gameState = "Over"
+    
 }
 
-var draw = function(){
+controller.draw = function(){
     model.snake.draw();
     model.coins.forEach(function(element) {
         element.draw();
     }, this);
-    elements.score.innerHTML = model.score;
+    view.score.innerHTML = model.score;
 }
 
-var init = function(){
-    elements.canvas = document.getElementById("canvas");
-    elements.context = elements.canvas.getContext("2d");
-    elements.score = document.getElementsByClassName("score")[0];
+controller.init = function(){
+    view.canvas = document.getElementById("canvas");
+    view.context = view.canvas.getContext("2d");
+    view.score = document.getElementsByClassName("score")[0];
     model.score = 0;
-    model.snake = new Snake();
-    model.coins.push(new Coin(randomPosition()));
+    model.snake = new object.Snake();
+    model.coins.push(new object.Coin(controller.randomPosition()));
     model.score = 0;
-    model.coins[0].draw();
-    model.snake.draw();
-    console.log(elements.score);
-    elements.score.innerHTML = 0;
-    gameLoop();
+    controller.draw();
+    console.log(view.score);
+    view.score.innerHTML = 0;
+    controller.gameLoop();
 };
 
-init();
+controller.init();
     
 window.onload = function(){
-    window.addEventListener("keydown", keypressHandler, false);
+    window.addEventListener("keydown", controller.keypressHandler, false);
 }
