@@ -5,8 +5,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Snake....  <span class="header-text">Score: </span><span class="score"></span></h1>
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="wrapper">
+        <div id="game">
+            <h1>Snake....  <span class="header-text">Score: </span><span class="score"></span></h1>
+            <div id="playArea">
+                <canvas id="canvas" width="500" height="500"></canvas>
+            </div>
+            <div id="playBtn"></div>
+        </div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,11 +1,11 @@
 var model = {
+    ctx: this,
     directions: {
         up: {vertical: -1, horizontal: 0},
         down: {vertical: 1, horizontal: 0},
         right: {vertical: 0, horizontal: 1},
         left: {vertical: 0, horizontal: -1}
     },
-    coins: [],
     // walls: [ [[-1, -1], [-1, 491]] , [[-1, 491], [491, 491]] , [[491, 491], [491, -1]] , [[-1, -1], [491, -1]] ]
     walls: {
         vertical: [
@@ -18,17 +18,34 @@ var model = {
         ],
         
     },
-    score: 0,
-    gameStates: {
-        over: {
-            headerText: "Game Over :("
-        },
-        play: {
-            headerText: "Score: "
-        },
-        start: {
-            headerText: "Press the Play button :)"
-        }
+    score: {text: 0},
+    
+    currentGameState: {},
+    init: function(){
+        model.gameStates = {
+            over: {
+                headerText: "Game Over :(",
+                scoreText: {text: ""},
+                playBtnText: "Play Again"
+            },
+            play: {
+                headerText: "Score: ",
+                scoreText: model.score,
+                playBtnText: "End Game"
+            },
+            start: {
+                headerText: "Press the Play button :)",
+                scoreText: {text: ""},
+                playBtnText: "Play"
+            }
+        };
+        model.headerText = "Score: "
+        model.score.text = 0;
+        model.coins = [];
+        model.coins.push(new object.Coin(controller.randomPosition()));
+        model.snake = new object.Snake();
+        model.currentGameState = model.gameStates.start;
+        console.log(this);
     }
 };
 
@@ -115,14 +132,17 @@ var object = {
 
 
 var view = {
-    score: "",
-    canvas: "",
-    context: "",
-    headerText: ""
+    init: function(){
+        view.canvas = document.getElementById("canvas");
+        view.context = view.canvas.getContext("2d");
+        view.score = document.getElementsByClassName("score")[0];
+        view.headerText = document.getElementsByClassName("header-text")[0];
+        view.playBtn = document.getElementById("playBtn");
+        view.playBtn.addEventListener("click", controller.playBtnClick, false);
+    }
 }
 
 var controller = {
-    gameState: {},
     collision: []
 };
 
@@ -143,6 +163,10 @@ controller.keypressHandler = function(e){
             break;
     }
 };
+
+controller.playBtnClick = function(){
+    model.currentGameState = model.gameStates.play;
+}
 
 controller.detectCollisions = function(){
     controller.collision = [];    
@@ -187,37 +211,39 @@ controller.randomNumber = function(min, max){
 
 controller.gameLoop = function(){
     console.log(JSON.parse(JSON.stringify(model.snake.blocks)));    
+    console.log(JSON.parse(JSON.stringify(model.score)));    
+    console.log(JSON.parse(JSON.stringify(model.currentGameState)));    
     setTimeout(function() {
-        model.snake.move.go();
-        controller.detectCollisions();
-        if(controller.collision.length > 0){
-            if(controller.collision[0].type == "wall" || controller.collision[0].type == "snake"){
-                controller.gameOver();
-            }
-            if(controller.collision[0].type =="coin"){
-                model.score++;
-                model.coins.pop();
-                model.coins.push(new object.Coin(controller.randomPosition()));
-                model.snake.increaseLength();
+        if(model.currentGameState === model.gameStates.play){
+            model.snake.move.go();  
+            controller.detectCollisions();
+            if(controller.collision.length > 0){
+                if(controller.collision[0].type == "wall" || controller.collision[0].type == "snake"){
+                    controller.gameOver();
+                }
+                if(controller.collision[0].type =="coin"){
+                    model.score.text++;
+                    model.coins.pop();
+                    model.coins.push(new object.Coin(controller.randomPosition()));
+                    model.snake.increaseLength();
+                }
             }
         }
         controller.draw();
-        if(controller.gameState === model.gameStates.play){
-            controller.gameLoop();
-        }
+        controller.gameLoop();
     }, 200);
 };
 
 controller.gameOver = function(){
-    controller.gameState = model.gameStates.over;
-    model.score = "";
+    model.currentGameState = model.gameStates.over;
     // Need some sort of game over animation    
 }
 
 controller.draw = function(){
-    view.score.innerHTML = model.score;
-    view.headerText.innerHTML = controller.gameState.headerText;
-    if(controller.gameState === model.gameStates.play){
+    view.score.innerHTML = model.currentGameState.scoreText.text;
+    view.headerText.innerHTML = model.currentGameState.headerText;
+    view.playBtn.innerHTML = model.currentGameState.playBtnText;
+    if(model.currentGameState === model.gameStates.play){
     controller.fillCanvas();
     }
 }
@@ -233,17 +259,9 @@ controller.fillCanvas = function(){
 
 controller.init = function(){
     // Get view elements
-    view.canvas = document.getElementById("canvas");
-    view.context = view.canvas.getContext("2d");
-    view.score = document.getElementsByClassName("score")[0];
-    view.headerText = document.getElementsByClassName("header-text")[0];
+    view.init();
     // Set initial Model elements
-    model.headerText = "Score: "
-    model.score = 0;
-    model.snake = new object.Snake();
-    model.coins.push(new object.Coin(controller.randomPosition()));
-    model.score = 0;
-    controller.gameState = model.gameStates.play;
+    model.init();
     // Draw scene
     controller.draw();
     controller.gameLoop();
