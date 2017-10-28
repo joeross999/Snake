@@ -24,16 +24,19 @@ var model = {
     init: function(){
         model.gameStates = {
             over: {
+                type: "over",
                 headerText: "Game Over :(",
                 scoreText: {text: ""},
                 playBtnText: "Play Again"
             },
             play: {
+                type: "play",
                 headerText: "Score: ",
                 scoreText: model.score,
                 playBtnText: "End Game"
             },
             start: {
+                type: "start",
                 headerText: "Press the Play button :)",
                 scoreText: {text: ""},
                 playBtnText: "Play"
@@ -45,7 +48,6 @@ var model = {
         model.coins.push(new object.Coin(controller.randomPosition()));
         model.snake = new object.Snake();
         model.currentGameState = model.gameStates.start;
-        console.log(this);
     }
 };
 
@@ -165,7 +167,15 @@ controller.keypressHandler = function(e){
 };
 
 controller.playBtnClick = function(){
-    model.currentGameState = model.gameStates.play;
+    if(model.currentGameState === model.gameStates.start || model.currentGameState === model.gameStates.over){
+        model.currentGameState = model.gameStates.play;
+    } else if(model.currentGameState === model.gameStates.play){
+        controller.init();
+        model.currentGameState = model.gameStates.over;
+    }else {
+        console.log("Something is wrong");
+    }
+    console.log(model.currentGameState);
 }
 
 controller.detectCollisions = function(){
@@ -210,9 +220,8 @@ controller.randomNumber = function(min, max){
 }
 
 controller.gameLoop = function(){
-    console.log(JSON.parse(JSON.stringify(model.snake.blocks)));    
-    console.log(JSON.parse(JSON.stringify(model.score)));    
-    console.log(JSON.parse(JSON.stringify(model.currentGameState)));    
+    // console.log(JSON.parse(JSON.stringify(model.snake.blocks)));   
+    // console.log(JSON.parse(JSON.stringify(model.currentGameState)));   
     setTimeout(function() {
         if(model.currentGameState === model.gameStates.play){
             model.snake.move.go();  
@@ -262,12 +271,13 @@ controller.init = function(){
     view.init();
     // Set initial Model elements
     model.init();
+    // console.log(JSON.parse(JSON.stringify(model)));
     // Draw scene
     controller.draw();
-    controller.gameLoop();
 };
 
 controller.init();
+controller.gameLoop();
     
 window.onload = function(){
     window.addEventListener("keydown", controller.keypressHandler, false);
