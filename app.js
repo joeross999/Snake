@@ -16,8 +16,8 @@ var model = {
             {y: -10, x: [0, 500]},
             {y: 500, x:[0, 500]} 
         ],
-        
     },
+
     score: {text: 0},
     
     currentGameState: {},
@@ -47,11 +47,14 @@ var model = {
         model.coins = [];
         model.coins.push(new object.Coin(controller.randomPosition()));
         model.snake = new object.Snake();
-        if(model.currentGameState = model.gameStates.play){
+        console.log(model.currentGameState);
+        if(model.currentGameState.type === model.gameStates.play.type){
             model.currentGameState = model.gameStates.over;
         }else {
             model.currentGameState = model.gameStates.start;
         }
+        console.log(model.currentGameState);
+        model.currentGameSpeed = 200;
     }
 };
 
@@ -178,7 +181,6 @@ controller.playBtnClick = function(){
     }else {
         console.log("Something is wrong");
     }
-    console.log(model.currentGameState);
 }
 
 controller.detectCollisions = function(){
@@ -212,6 +214,10 @@ controller.detectCollisions = function(){
     };
 };
 
+controller.checkGameSpeed = function(){
+
+};
+
 controller.randomPosition = function(){
     var x = controller.randomNumber(1, 49) * 10;
     var y = controller.randomNumber(1, 49) * 10;
@@ -241,9 +247,10 @@ controller.gameLoop = function(){
                 }
             }
         }
+        controller.checkGameSpeed();
         controller.draw();
         controller.gameLoop();
-    }, 200);
+    }, model.currentGameSpeed);
 };
 
 controller.gameOver = function(){
