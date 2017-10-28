@@ -47,7 +47,11 @@ var model = {
         model.coins = [];
         model.coins.push(new object.Coin(controller.randomPosition()));
         model.snake = new object.Snake();
-        model.currentGameState = model.gameStates.start;
+        if(model.currentGameState = model.gameStates.play){
+            model.currentGameState = model.gameStates.over;
+        }else {
+            model.currentGameState = model.gameStates.start;
+        }
     }
 };
 
@@ -171,7 +175,6 @@ controller.playBtnClick = function(){
         model.currentGameState = model.gameStates.play;
     } else if(model.currentGameState === model.gameStates.play){
         controller.init();
-        model.currentGameState = model.gameStates.over;
     }else {
         console.log("Something is wrong");
     }
