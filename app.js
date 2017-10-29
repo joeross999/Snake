@@ -17,7 +17,13 @@ var model = {
             {y: 500, x:[0, 500]} 
         ],
     },
-
+    gameSpeeds: {
+        5: 150,
+        10: 125,
+        15: 110, 
+        20: 100,
+        25: 90,
+    },
     score: {text: 0},
     
     currentGameState: {},
@@ -48,7 +54,7 @@ var model = {
         model.coins.push(new object.Coin(controller.randomPosition()));
         model.snake = new object.Snake();
         console.log(model.currentGameState);
-        if(model.currentGameState.type === model.gameStates.play.type){
+        if(model.currentGameState.type === model.gameStates.play.type || model.currentGameState.type === model.gameStates.over.type){
             model.currentGameState = model.gameStates.over;
         }else {
             model.currentGameState = model.gameStates.start;
@@ -174,9 +180,13 @@ controller.keypressHandler = function(e){
 };
 
 controller.playBtnClick = function(){
-    if(model.currentGameState === model.gameStates.start || model.currentGameState === model.gameStates.over){
+    if(model.currentGameState === model.gameStates.start){
         model.currentGameState = model.gameStates.play;
-    } else if(model.currentGameState === model.gameStates.play){
+    } else if(model.currentGameState === model.gameStates.over){
+        controller.init();
+        model.currentGameState = model.gameStates.play;
+    }else if(model.currentGameState === model.gameStates.play){
+        // gameOver();
         controller.init();
     }else {
         console.log("Something is wrong");
@@ -215,7 +225,27 @@ controller.detectCollisions = function(){
 };
 
 controller.checkGameSpeed = function(){
-
+    // switch(model.score.text){
+    //     case 0 :
+    //         model.currentGameSpeed = model.gameSpeeds[1];
+    //         break;
+    //     case 1: 
+    //         model.currentGameSpeed = model.gameSpeeds[2];
+    //         break;
+    //     case 2: 
+    //         model.currentGameSpeed = model.gameSpeeds[3];
+    //         break;
+    //     case 3: 
+    //         model.currentGameSpeed = model.gameSpeeds[4];
+    //         break;
+    //     case 4: 
+    //         model.currentGameSpeed = model.gameSpeeds[5];
+    //         break;
+    // }
+    if(model.gameSpeeds[model.score.text]){
+        model.currentGameSpeed = model.gameSpeeds[model.score.text];
+    }
+    console.log(model.currentGameSpeed);
 };
 
 controller.randomPosition = function(){
@@ -244,10 +274,10 @@ controller.gameLoop = function(){
                     model.coins.pop();
                     model.coins.push(new object.Coin(controller.randomPosition()));
                     model.snake.increaseLength();
+                    controller.checkGameSpeed();
                 }
             }
         }
-        controller.checkGameSpeed();
         controller.draw();
         controller.gameLoop();
     }, model.currentGameSpeed);
