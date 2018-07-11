@@ -6,7 +6,6 @@ var model = {
         right: {vertical: 0, horizontal: 1},
         left: {vertical: 0, horizontal: -1}
     },
-    // walls: [ [[-1, -1], [-1, 491]] , [[-1, 491], [491, 491]] , [[491, 491], [491, -1]] , [[-1, -1], [491, -1]] ]
     walls: {
         vertical: [
             {x: -10, y: [0, 500]},
@@ -225,23 +224,6 @@ controller.detectCollisions = function(){
 };
 
 controller.checkGameSpeed = function(){
-    // switch(model.score.text){
-    //     case 0 :
-    //         model.currentGameSpeed = model.gameSpeeds[1];
-    //         break;
-    //     case 1: 
-    //         model.currentGameSpeed = model.gameSpeeds[2];
-    //         break;
-    //     case 2: 
-    //         model.currentGameSpeed = model.gameSpeeds[3];
-    //         break;
-    //     case 3: 
-    //         model.currentGameSpeed = model.gameSpeeds[4];
-    //         break;
-    //     case 4: 
-    //         model.currentGameSpeed = model.gameSpeeds[5];
-    //         break;
-    // }
     if(model.gameSpeeds[model.score.text]){
         model.currentGameSpeed = model.gameSpeeds[model.score.text];
     }
@@ -258,9 +240,7 @@ controller.randomNumber = function(min, max){
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-controller.gameLoop = function(){
-    // console.log(JSON.parse(JSON.stringify(model.snake.blocks)));   
-    // console.log(JSON.parse(JSON.stringify(model.currentGameState)));   
+controller.gameLoop = function(){   
     setTimeout(function() {
         if(model.currentGameState === model.gameStates.play){
             model.snake.move.go();  
